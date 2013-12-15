@@ -6,7 +6,7 @@ from os import listdir
 from re import search
 
 # change this line to match your folder structure
-SRC_DIR = '/Users/laurenpmagnuson/Sites/mfhd/journals'
+SRC_DIR = '/Users/laurenpmagnuson/repos/marc-to-kbart/test'
 
 # get a list of all .mrc files in source directory
 file_list = filter(lambda x: search('.mrc', x), listdir(SRC_DIR))
@@ -28,8 +28,8 @@ for item in file_list:
         publication_title = publication_title + " " + record['245']['b']
     
     # print_identifier
-    if record['022'] is not None:
-      print_identifier = record['022']['a']
+    if record['020'] is not None:
+      print_identifier = record['020']['a']
       
     # online_identifier
     online_identifier = ''
@@ -39,8 +39,9 @@ for item in file_list:
       date_first_issue_online = record['863']['i']
     
     # num_first_vol_online
-    if record ['863'] is not None:
-      num_first_vol_online = record['863']['a']
+    if record ['866'] is not None:
+      sep = '-'
+      num_last_vol_online = record['866']['a'].split(sep, 1)[0]
     
     # num_first_issue_online
     if record ['863'] is not None:
@@ -51,8 +52,9 @@ for item in file_list:
       date_last_issue_online = record['863']['b']
     
     # num_last_vol_online
-    if record ['863'] is not None:
-      num_last_vol_online = record['863']['a']
+    if record ['866'] is not None:
+      sep = '-'
+      num_last_vol_online = record['866']['a'].split(sep, 1)[-1]
     
     # num_last_issue_online
     num_last_issue_online = ''
@@ -75,15 +77,17 @@ for item in file_list:
     title_id = ''
     
     #coverage_depth (options fulltext, ebook, print)
-    coverage_depth = 'fulltext'
+    coverage_depth = ('fulltext')
     
     #coverage_notes (e.g., graphics excluded)
-    coverage_notes = ''
+    if record['852']['z'] is not None:
+      coverage_notes = record['852']['z']
     
-    #publisher_name (options fulltext, ebook, print)
-    publisher_name = ''
+    # publisher
+    if record['260'] is not None:
+      publisher_name = record['260']['b']
     
-    #location (options fulltext, ebook, print)
+    #location (shelving location, collection, or available online)
     location = ''
     
     #title_notes
@@ -93,7 +97,7 @@ for item in file_list:
     oclc_collection_name = ''
     
     #oclc_collection_id
-    collection = 'customer.59274.1'
+    oclc_collection_id = ('customer.59274.1')
     
     #oclc_entry_id
     oclc_entry_id = ''
@@ -107,19 +111,10 @@ for item in file_list:
         oclc_number = record['035']['a'].replace('(OCoLC)', '')
     
     #action
-    action = 'RAW'
-     
-    # date
-    if record['260'] is not None:
-      date = record['260']['c']
-    
-    # subject
-    if record['650'] is not None:
-      subject = record['650']['a']
-    
-    # publisher
-    if record['260'] is not None:
-      publisher_name = record['260']['b']
-    
+    action = ('RAW')
+       
     csv_out.writerow([publication_title, print_identifier, online_identifier, date_first_issue_online, num_first_vol_online, num_first_issue_online, date_last_issue_online, num_last_vol_online, num_last_issue_online, title_url, first_author, title_id, coverage_depth, coverage_notes, publisher_name, location, title_notes, oclc_collection_name, oclc_collection_id, oclc_entry_id, oclc_linkscheme, oclc_number, action])
   fd.close()
+  
+  
+  #todo:  grab volumes/issues;grab collection codes for collection ID (libs to replace); remove 245 after /; test OCLC load.
