@@ -5,16 +5,19 @@ from pymarc import MARCReader
 from os import listdir
 from re import search
 
-# change this line to match your folder structure
+# change the source directory to whatever directory your .mrc files are in
 SRC_DIR = 'marc/'
 
 # get a list of all .mrc files in source directory
 file_list = filter(lambda x: search('.mrc', x), listdir(SRC_DIR))
 
-csv_out = csv.writer(open('printjournals.txt', 'w'), delimiter = '\t', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
+#create tab delimited text file that only quotes fields if there is a special character present in the field
+csv_out = csv.writer(open('kbart.txt', 'w'), delimiter = '\t', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
 
+#create the header row
 csv_out.writerow(['publication_title', 'print_identifier', 'online_identifier', 'date_first_issue_online', 'num_first_vol_online', 'num_first_issue_online', 'date_last_issue_online', 'num_last_vol_online', 'num_last_issue_online', 'title_url', 'first_author', 'title_id', 'coverage_depth', 'coverage_notes', 'publisher_name', 'location', 'title_notes', 'oclc_collection_name', 'oclc_collection_id', 'oclc_entry_id', 'oclc_linkscheme', 'oclc_number', 'action'])
-     
+
+#define the MARC fields to use for each element and parse them     
 for item in file_list:
   fd = file(SRC_DIR + '/' + item, 'r')
   reader = MARCReader(fd)
@@ -23,27 +26,27 @@ for item in file_list:
 
     # publication_title
     if record['245'] is not None:
-      publication_title = record['245']['a']
+      publication_title = record['245']['a'].rsplit('/', 1)[0]
       if record['245']['b'] is not None:
         publication_title = publication_title + " " + record['245']['b']
     
     # print_identifier
     if record['020'] is not None:
       if record['020']['z'] is not None:
-        print_identifier = record ['020']['z']
+        print_identifier = record ['020']['z'].rsplit('(', 1)[0]
         if record['020']['a'] is not None:
-          print_identifier = record['020']['a'] 
+          print_identifier = record['020']['a'].rsplit('(', 1)[0] 
     elif record['022'] is not None:
       if record['022']['y'] is not None:
-        print_identifier = record['022']['y']
+        print_identifier = record['022']['y'].rsplit('(', 1)[0]
         if record['022']['a'] is not None:
-          print_identifier = record['022']['a']
+          print_identifier = record['022']['a'].rsplit('(', 1)[0]
       
     # online_identifier
     if record['020'] is not None:
-      online_identifier = record['020']['a']
+      online_identifier = record['020']['a'].rsplit('(', 1)[0]
     elif record['022'] is not None:
-      online_identifier = record['022']['a'] 
+      online_identifier = record['022']['a'].rsplit('(', 1)[0] 
     
     # date_first_issue_online
     if record ['863'] is not None:
@@ -112,7 +115,6 @@ for item in file_list:
             if record['852']['i'] is not None:
               location = record['852']['b'] + " " + record['852']['c'] + " " + record['852']['h'] + " " + record ['852']['i']
 
-    
     #title_notes
     if record['852'] is not None:
       title_notes = record['852']['z']
@@ -138,6 +140,7 @@ for item in file_list:
     
     #action
     action = ('RAW')
-       
+    
+    #write each row   
     csv_out.writerow([publication_title, print_identifier, online_identifier, date_first_issue_online, num_first_vol_online, num_first_issue_online, date_last_issue_online, num_last_vol_online, num_last_issue_online, title_url, first_author, title_id, coverage_depth, coverage_notes, publisher_name, location, title_notes, oclc_collection_name, oclc_collection_id, oclc_entry_id, oclc_linkscheme, oclc_number, action])
   fd.close()
