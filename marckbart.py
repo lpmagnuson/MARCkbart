@@ -94,8 +94,8 @@ for item in file_list:
       coverage_depth = ('print')
     
     #coverage_notes (e.g., graphics excluded)
-    if record['852'] is not None:
-      coverage_notes = record['852']['z']
+    if record['866'] is not None:
+      coverage_notes = record['866']['a']
     
     # publisher
     if record['260'] is not None:
@@ -114,7 +114,8 @@ for item in file_list:
 
     
     #title_notes
-    title_notes = ''
+    if record['852'] is not None:
+      title_notes = record['852']['z']
     
     #oclc_collection_name
     oclc_collection_name = ''
