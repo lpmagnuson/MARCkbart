@@ -13,13 +13,13 @@ file_list = filter(lambda x: search('.mrc', x), listdir(SRC_DIR))
 
 csv_out = csv.writer(open('printjournals.txt', 'w'), delimiter = '\t', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
 
-csv_out.writerow(['publication_title', 'print_identifier', 'online_identifier', 'date_first_issue_online', 'num_first_vol_online', 'num_first_issue_online', 'date_last_issue_online', 'num_last_vol_online', 'num_last_issue_online', 'title_url', 'first_author', 'title_id', 'coverage_depth', 'coverage_notes', 'publisher_name', 'location', 'title_notes', 'oclc_collection_name', 'oclc_collection_id', 'oclc_entry_id', 'oclc_linkscheme', 'oclc_number', 'action', 'ownREMOVE', 'format', 'full845'])
+csv_out.writerow(['publication_title', 'print_identifier', 'online_identifier', 'date_first_issue_online', 'num_first_vol_online', 'num_first_issue_online', 'date_last_issue_online', 'num_last_vol_online', 'num_last_issue_online', 'title_url', 'first_author', 'title_id', 'coverage_depth', 'coverage_notes', 'publisher_name', 'location', 'title_notes', 'oclc_collection_name', 'oclc_collection_id', 'oclc_entry_id', 'oclc_linkscheme', 'oclc_number', 'action'])
      
 for item in file_list:
   fd = file(SRC_DIR + '/' + item, 'r')
   reader = MARCReader(fd)
   for record in reader:
-    publication_title = print_identifier = online_identifier = date_first_issue_online = num_first_vol_online = num_first_issue_online = date_last_issue_online = num_last_vol_online = num_last_issue_online = title_url = first_author = title_id = coverage_depth = coverage_notes = publisher_name = location = title_notes = oclc_collection_name = oclc_collection_id = oclc_entry_id = oclc_linkscheme = oclc_number = action = ownREMOVE = format = full856 = ''
+    publication_title = print_identifier = online_identifier = date_first_issue_online = num_first_vol_online = num_first_issue_online = date_last_issue_online = num_last_vol_online = num_last_issue_online = title_url = first_author = title_id = coverage_depth = coverage_notes = publisher_name = location = title_notes = oclc_collection_name = oclc_collection_id = oclc_entry_id = oclc_linkscheme = oclc_number = action = ''
 
     # publication_title
     if record['245'] is not None:
@@ -29,21 +29,30 @@ for item in file_list:
     
     # print_identifier
     if record['020'] is not None:
-      print_identifier = record['020']['a']
+      if record['020']['z'] is not None:
+        print_identifier = record ['020']['z']
+        if record['020']['a'] is not None:
+          print_identifier = record['020']['a'] 
     elif record['022'] is not None:
-      print_identifier = record['022']['a']
+      if record['022']['y'] is not None:
+        print_identifier = record['022']['y']
+        if record['022']['a'] is not None:
+          print_identifier = record['022']['a']
       
     # online_identifier
-    online_identifier = ''
+    if record['020'] is not None:
+      online_identifier = record['020']['a']
+    elif record['022'] is not None:
+      online_identifier = record['022']['a'] 
     
     # date_first_issue_online
     if record ['863'] is not None:
       date_first_issue_online = record['863']['i']
     
     # num_first_vol_online
-    #if record ['866'] is not None:
-      #sep = '-'
-      #num_last_vol_online = record['866']['a'].split(sep, 1)[0]
+    if record ['866'] is not None:
+      sep = '-'
+      num_last_vol_online = record['866']['a'].split(sep, 1)[0]
     
     # num_first_issue_online
     if record ['863'] is not None:
@@ -54,9 +63,9 @@ for item in file_list:
       date_last_issue_online = record['863']['b']
     
     # num_last_vol_online
-    #if record ['866'] is not None:
-      #sep = '-'
-      #num_last_vol_online = record['866']['a'].split(sep, 1)[-1]
+    if record ['866'] is not None:
+      sep = '-'
+      num_last_vol_online = record['866']['a'].split(sep, 1)[-1]
     
     # num_last_issue_online
     num_last_issue_online = ''
@@ -83,7 +92,6 @@ for item in file_list:
       coverage_depth = ('fulltext')
     else: 
       coverage_depth = ('print')
-    
     
     #coverage_notes (e.g., graphics excluded)
     if record['852'] is not None:
@@ -129,23 +137,6 @@ for item in file_list:
     
     #action
     action = ('RAW')
-    
-    #Holding Library - to be remoed
-    if record['995'] is not None:
-      ownREMOVE = record['995']['a']
-    
-    #Format - monograph or serial
-    if record['997'] is not None:
-      format = record['997']['a']
-    elif record ['996'] is not None:
-      format = record['996']['a']
-    
-    #Full 856 w/indicators
-    if record['856'] is not None:
-      full856 = record['856']
        
-    csv_out.writerow([publication_title, print_identifier, online_identifier, date_first_issue_online, num_first_vol_online, num_first_issue_online, date_last_issue_online, num_last_vol_online, num_last_issue_online, title_url, first_author, title_id, coverage_depth, coverage_notes, publisher_name, location, title_notes, oclc_collection_name, oclc_collection_id, oclc_entry_id, oclc_linkscheme, oclc_number, action, ownREMOVE, format, full856])
+    csv_out.writerow([publication_title, print_identifier, online_identifier, date_first_issue_online, num_first_vol_online, num_first_issue_online, date_last_issue_online, num_last_vol_online, num_last_issue_online, title_url, first_author, title_id, coverage_depth, coverage_notes, publisher_name, location, title_notes, oclc_collection_name, oclc_collection_id, oclc_entry_id, oclc_linkscheme, oclc_number, action])
   fd.close()
-  
-  
-  #todo:  grab volumes/issues;grab collection codes for collection ID (libs to replace); remove 245 after /; test OCLC load.
