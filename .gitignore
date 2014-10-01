@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /records
 /test
 kbjournals.txt
@@ -7,3 +8,7 @@ printjournals.txt
 /marc/old
 /marc/serials_complete
 /mfhd
+=======
+/marc
+/output
+>>>>>>> 4292889dbcf094b61bd84708c8a1cdcfae13a6a8
