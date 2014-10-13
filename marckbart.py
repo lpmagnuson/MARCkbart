@@ -49,26 +49,23 @@ for item in file_list:
       online_identifier = record['022']['a'].rsplit('(', 1)[0] 
     
     # date_first_issue_online
-    if record ['863'] is not None:
-      date_first_issue_online = record['863']['i']
+    if record ['866'] is not None:
+      date_first_issue_online = record['866']['a'].rsplit('-', 1)[0]
     
     # num_first_vol_online
-    if record ['866'] is not None:
-      sep = '-'
-      num_last_vol_online = record['866']['a'].split(sep, 1)[0]
+    if record ['863'] is not None:
+      num_first_vol_online = record['863']['a'].rsplit('-', 1)[0]
     
     # num_first_issue_online
-    if record ['863'] is not None:
-      num_first_issue_online = record['863']['b']
+    num_first_issue_online = ''
     
     # date_last_issue_online
-    if record ['863'] is not None:
-      date_last_issue_online = record['863']['b']
+    if record ['866'] is not None:
+      date_last_issue_online = record['866']['a'].rsplit('-', 1)[-1]
     
     # num_last_vol_online
-    if record ['866'] is not None:
-      sep = '-'
-      num_last_vol_online = record['866']['a'].split(sep, 1)[-1]
+    if record ['863'] is not None:
+      num_last_vol_online = record['863']['a'].rsplit('-', 1)[-1]
     
     # num_last_issue_online
     num_last_issue_online = ''
