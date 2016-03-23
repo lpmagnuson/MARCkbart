@@ -15,14 +15,14 @@ file_list = filter(lambda x: search('.mrc', x), listdir(SRC_DIR))
 csv_out = csv.writer(open('kbart.txt', 'w'), delimiter = '\t', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
 
 #create the header row
-csv_out.writerow(['publication_title', 'print_identifier', 'online_identifier', 'date_first_issue_online', 'num_first_vol_online', 'num_first_issue_online', 'date_last_issue_online', 'num_last_vol_online', 'num_last_issue_online', 'title_url', 'first_author', 'title_id', 'coverage_depth', 'coverage_notes', 'publisher_name', 'location', 'title_notes', 'oclc_collection_name', 'oclc_collection_id', 'oclc_entry_id', 'oclc_linkscheme', 'oclc_number', 'action'])
+csv_out.writerow(['publication_title', 'print_identifier', 'online_identifier', 'date_first_issue_online', 'num_first_vol_online', 'num_first_issue_online', 'date_last_issue_online', 'num_last_vol_online', 'num_last_issue_online', 'title_url', 'first_author', 'title_id', 'embargo_info', 'coverage_depth', 'coverage_notes', 'publisher_name', 'location', 'title_notes', 'staff_notes', 'vendor_id', 'oclc_collection_name', 'oclc_collection_id', 'oclc_entry_id', 'oclc_linkscheme', 'oclc_number', 'ACTION'])
 
 #define the MARC fields to use for each element and parse them     
 for item in file_list:
   fd = file(SRC_DIR + '/' + item, 'r')
   reader = MARCReader(fd)
   for record in reader:
-    publication_title = print_identifier = online_identifier = date_first_issue_online = num_first_vol_online = num_first_issue_online = date_last_issue_online = num_last_vol_online = num_last_issue_online = title_url = first_author = title_id = coverage_depth = coverage_notes = publisher_name = location = title_notes = oclc_collection_name = oclc_collection_id = oclc_entry_id = oclc_linkscheme = oclc_number = action = ''
+    publication_title = print_identifier = online_identifier = date_first_issue_online = num_first_vol_online = num_first_issue_online = date_last_issue_online = num_last_vol_online = num_last_issue_online = title_url = first_author = title_id = embargo_info = coverage_depth = coverage_notes = publisher_name = location = title_notes = staff_notes = vendor_id = oclc_collection_name = oclc_collection_id = oclc_entry_id = oclc_linkscheme = oclc_number = ACTION = ''
 
     # publication_title
     if record['245'] is not None:
@@ -87,6 +87,9 @@ for item in file_list:
     #titleid
     title_id = ''
     
+    #embargoinfo
+    embargo_info = ''
+    
     #coverage_depth (options fulltext, ebook, print)
     if record['856'] is not None:
       coverage_depth = ('fulltext')
@@ -119,6 +122,12 @@ for item in file_list:
     #oclc_collection_name
     oclc_collection_name = ''
     
+    #staff_notes
+    staff_notes = ''
+    
+    #vendor_id
+    vendor_id = ''
+    
     #oclc_collection_id
     oclc_collection_id = ''
     
@@ -139,5 +148,5 @@ for item in file_list:
     action = ('RAW')
     
     #write each row   
-    csv_out.writerow([publication_title, print_identifier, online_identifier, date_first_issue_online, num_first_vol_online, num_first_issue_online, date_last_issue_online, num_last_vol_online, num_last_issue_online, title_url, first_author, title_id, coverage_depth, coverage_notes, publisher_name, location, title_notes, oclc_collection_name, oclc_collection_id, oclc_entry_id, oclc_linkscheme, oclc_number, action])
+    csv_out.writerow([publication_title, print_identifier, online_identifier, date_first_issue_online, num_first_vol_online, num_first_issue_online, date_last_issue_online, num_last_vol_online, num_last_issue_online, title_url, first_author, title_id, embargo_info, coverage_depth, coverage_notes, publisher_name, location, title_notes, staff_notes, vendor_id, oclc_collection_name, oclc_collection_id, oclc_entry_id, oclc_linkscheme, oclc_number, action])
   fd.close()
