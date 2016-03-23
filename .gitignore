@@ -7,3 +7,5 @@ printjournals.txt
 /marctest
 /mfhd
 /output
+*.txt
+/marc/*.mrc
