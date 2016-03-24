@@ -9,3 +9,5 @@ printjournals.txt
 /output
 *.txt
 /marc/*.mrc
+*.zip
+/marc/done
