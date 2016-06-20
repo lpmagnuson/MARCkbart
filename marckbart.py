@@ -28,7 +28,7 @@ for item in file_list:
     publication_title = print_identifier = online_identifier = date_first_issue_online = num_first_vol_online = num_first_issue_online = date_last_issue_online = num_last_vol_online = num_last_issue_online = title_url = first_author = title_id = embargo_info = coverage_depth = coverage_notes = publisher_name = location = title_notes = staff_notes = vendor_id = oclc_collection_name = oclc_collection_id = oclc_entry_id = oclc_linkscheme = oclc_number = ACTION = ''
 
     # publication_title
-    if record['245'] is not None:
+    if record['245']['a'] is not None:
       publication_title = record['245']['a'].rsplit('/', 1)[0]
       if record['245']['b'] is not None:
         publication_title = publication_title + " " + record['245']['b']
@@ -139,24 +139,17 @@ for item in file_list:
     
     #oclc_linkscheme
     oclc_linkscheme = ''
-    
-    #oclc_number
-    if len(record.get_fields('035')[0].get_subfields('a')) > 0:    
-      oclc_number1 = str(record.get_fields('035')[0].get_subfields('a'))
-    else:
-      oclc_number1 = ''
-    if len(record.get_fields('035')[1].get_subfields('a')) > 0:
-      oclc_number2 = str(record.get_fields('035')[1].get_subfields('a'))
-    else: 
-      oclc_number2 = ''
-    if oclc_number1.find("OCoLC") >= 0:
-      oclc_number1 = oclc_number1.replace('(OCoLC)', '')
-      oclc_number = oclc_number1[2:][:-2]
-    elif oclc_number2.find("OCoLC") >= 0:
-      oclc_number2 = oclc_number2.replace('(OCoLC)', '')
-      oclc_number = oclc_number2[2:][:-2]
-    else:
-      oclc_number = oclc_number1[2:][:-2]
+
+    if record['035'] is not None:
+      if record['035']['a'] is not None:
+        oclc_number = record['035']['a']
+        if oclc_number.find("OCoLC") >= 0:
+          oclc_number = oclc_number.replace('(OCoLC)', '')
+          oclc_number = oclc_number
+        else:
+          oclc_number = ''
+      else:
+       oclc_number = ''
     
     #action
     action = ('RAW')
