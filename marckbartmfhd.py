@@ -5,6 +5,7 @@ from pymarc import MARCReader
 import os
 import shutil
 import zipfile
+import re
 from os import listdir
 from re import search
 
@@ -18,17 +19,18 @@ file_list = filter(lambda x: search('.mrc', x), listdir(SRC_DIR))
 csv_out = csv.writer(open('kbart.txt', 'w'), delimiter = '\t', quotechar = '"', quoting = csv.QUOTE_MINIMAL)
 
 #create the header row
-csv_out.writerow(['publication_title', 'print_identifier', 'online_identifier', 'date_first_issue_online', 'num_first_vol_online', 'num_first_issue_online', 'date_last_issue_online', 'num_last_vol_online', 'num_last_issue_online', 'title_url', 'first_author', 'title_id', 'embargo_info', 'coverage_depth', 'coverage_notes', 'publisher_name', 'location', 'title_notes', 'staff_notes', 'vendor_id', 'oclc_collection_name', 'oclc_collection_id', 'oclc_entry_id', 'oclc_linkscheme', 'oclc_number', 'ACTION'])
+csv_out.writerow(['publication_title', 'print_identifier', 'online_identifier', 'date_first_issue_online', 'num_first_vol_online', 'num_first_issue_online', 'date_last_issue_online', 'num_last_vol_online', 'num_last_issue_online', 'title_url', 'first_author', 'title_id', 'embargo_info', 'coverage_depth', 'coverage_notes', 'publisher_name', 'location', 'title_notes', 'staff_notes', 'vendor_id', 'oclc_collection_name', 'oclc_collection_id', 'oclc_entry_id', 'oclc_linkscheme', 'oclc_number', 'ACTION','rectype'])
 
 #define the MARC fields to use for each element and parse them     
 for item in file_list:
   fd = file(SRC_DIR + '/' + item, 'r')
   reader = MARCReader(fd)
   for record in reader:
-    publication_title = print_identifier = online_identifier = date_first_issue_online = num_first_vol_online = num_first_issue_online = date_last_issue_online = num_last_vol_online = num_last_issue_online = title_url = first_author = title_id = embargo_info = coverage_depth = coverage_notes = publisher_name = location = title_notes = staff_notes = vendor_id = oclc_collection_name = oclc_collection_id = oclc_entry_id = oclc_linkscheme = oclc_number = ACTION = ''
+    publication_title = print_identifier = online_identifier = date_first_issue_online = num_first_vol_online = num_first_issue_online = date_last_issue_online = num_last_vol_online = num_last_issue_online = title_url = first_author = title_id = embargo_info = coverage_depth = coverage_notes = publisher_name = location = title_notes = staff_notes = vendor_id = oclc_collection_name = oclc_collection_id = oclc_entry_id = oclc_linkscheme = oclc_number = ACTION = rectype = ''
 
     # publication_title
     if record['245'] is not None:
+      rectype = "bib"
       if record['245']['a'] is not None:
         publication_title = record['245']['a'].rsplit('/', 1)[0]
       if record['245']['b'] is not None:
@@ -58,23 +60,44 @@ for item in file_list:
     # date_first_issue_online
     if record ['866'] is not None:
       date_first_issue_online = record['866']['a'].rsplit('-', 1)[0]
+      if '(' in date_first_issue_online:
+        date_first_issue_online = date_first_issue_online.rsplit('(',1)[-1][:4]
     
     # num_first_vol_online
-    if record ['863'] is not None:
+    if record['866'] is not None:
+      #if 'v' in record ['866']['a']:
+      num_first_vol_online = record['866']['a']
+      if 'v.' in num_first_vol_online:
+        num_first_vol_online = num_first_vol_online.split('v.', 1)[1]
+        for match in re.findall('\d+', num_first_vol_online):
+          num_first_vol_online = re.findall('\d+', num_first_vol_online)[0]
+    elif record ['863'] is not None:
       if '-' in record ['863']:
         num_first_vol_online = record['863']['a'].rsplit('-', 1)[0]
       else:
-        num_first_vol_online = record['863']['a']
-    
+        num_first_vol_online = record['863']['a'] 
+        
     # num_first_issue_online
     num_first_issue_online = ''
     
     # date_last_issue_online
     if record ['866'] is not None:
-      date_last_issue_online = record['866']['a'].rsplit('-', 1)[-1]
+      date_last_issue_online = record['866']['a'].rsplit('-', 1)[-1][:4]
     
     # num_last_vol_online
-    if record ['863'] is not None:
+    if record['866'] is not None:
+      num_last_vol_online = record['866']['a']
+      if '-v.' in num_last_vol_online:
+        num_last_vol_online = num_last_vol_online.split('-v.', 1)[1]
+        for match in re.findall('\d+', num_last_vol_online):
+          num_last_vol_online = re.findall('\d+', num_last_vol_online)[0]
+      elif '-' in num_last_vol_online:
+        num_last_vol_online = num_last_vol_online.split('-', 1)[1]
+        for match in re.findall('\d+', num_last_vol_online):
+          num_last_vol_online = re.findall('\d+', num_last_vol_online)[0]
+      else:
+        num_last_vol_online = ''
+    elif record ['863'] is not None:
       if '-' in record ['863']:
         num_last_vol_online = record['863']['a'].rsplit('-', 1)[-1]
       else:
@@ -160,12 +183,19 @@ for item in file_list:
           oclc_number = ''
       else:
        oclc_number = ''
-    
+    elif record['004'] is not None:
+      oclc_number = record['004']
+      oclc_number = str(oclc_number)
+      oclc_number = oclc_number.replace('=004  ocm', '')
+      oclc_number = oclc_number.replace('\\', '')
+    else:
+      oclc_number = ''
+       
     #action
     action = ('RAW')
     
     #write each row   
-    csv_out.writerow([publication_title, print_identifier, online_identifier, date_first_issue_online, num_first_vol_online, num_first_issue_online, date_last_issue_online, num_last_vol_online, num_last_issue_online, title_url, first_author, title_id, embargo_info, coverage_depth, coverage_notes, publisher_name, location, title_notes, staff_notes, vendor_id, oclc_collection_name, oclc_collection_id, oclc_entry_id, oclc_linkscheme, oclc_number, action])
+    csv_out.writerow([publication_title, print_identifier, online_identifier, date_first_issue_online, num_first_vol_online, num_first_issue_online, date_last_issue_online, num_last_vol_online, num_last_issue_online, title_url, first_author, title_id, embargo_info, coverage_depth, coverage_notes, publisher_name, location, title_notes, staff_notes, vendor_id, oclc_collection_name, oclc_collection_id, oclc_entry_id, oclc_linkscheme, oclc_number, action, rectype])
   fd.close()
 
 #copy files to a web directory
