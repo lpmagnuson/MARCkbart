@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import csv
+import unicodecsv as csv
 from pymarc import MARCReader
 import os
 import shutil
